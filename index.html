@@ -97,7 +97,7 @@
 
   <div class="main-layout">
     <div class="left-panel">
-      <h2>📊 各排排行榜</h2>
+      <h2>📊 各排剩餘人數</h2>
       <div id="columnRanking"></div>
     </div>
     <div>
@@ -138,7 +138,7 @@
     const scoreList = document.getElementById('scoreList');
 
     let scores = {};
-    let columnStats = Array(COLS).fill(0);
+    let columnStats = Array(COLS).fill(ROWS);S);
 
     function createBoard() {
       board.innerHTML = '';
@@ -169,7 +169,7 @@
 
         btn.onclick = () => {
           columnHits[c]++;
-          columnStats[c]++;
+          columnStats[c] = Math.max(0, columnStats[c] - 1);
 
           if (columnHits[c] >= 3) {
             explodeColumn(c);
@@ -193,14 +193,14 @@
           col: index + 1,
           count
         }))
-        .sort((a, b) => b.count - a.count);
+        .sort((a, b) => a.count - b.count);
 
       sorted.forEach(item => {
         const div = document.createElement('div');
         div.className = 'score-item';
         div.innerHTML = `
           <span>第 ${item.col} 排</span>
-          <strong>${item.count} 次</strong>
+          <strong>剩餘 ${item.count} 人</strong>
         `;
 
         ranking.appendChild(div);
