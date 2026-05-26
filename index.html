@@ -110,8 +110,9 @@
   </div>
 
   <script>
-    const ROWS = 6;
-    const COLS = 8;
+    const ROWS = 8;
+    const COLS = 6;
+    let columnHits = Array(COLS).fill(0);
 
     const board = document.getElementById('board');
     const columnButtons = document.getElementById('columnButtons');
@@ -129,6 +130,9 @@
           cell.className = 'cell';
           cell.dataset.row = r;
           cell.dataset.col = c;
+
+          cell.onclick = () => singleExplode(cell);
+
           board.appendChild(cell);
         }
       }
@@ -139,10 +143,30 @@
 
       for (let c = 0; c < COLS; c++) {
         const btn = document.createElement('button');
-        btn.textContent = `爆第 ${c + 1} 排`;
-        btn.onclick = () => explodeColumn(c);
+        btn.id = `colBtn-${c}`;
+        updateColumnButton(c, btn);
+
+        btn.onclick = () => {
+          columnHits[c]++;
+
+          if (columnHits[c] >= 3) {
+            explodeColumn(c);
+            columnHits[c] = 0;
+          }
+
+          updateColumnButton(c, btn);
+        };
+
         columnButtons.appendChild(btn);
       }
+    }
+
+    function updateColumnButton(col, btn) {
+      const count = columnHits[col];
+
+      if (count === 0) btn.textContent = `第 ${col + 1} 排`;
+      if (count === 1) btn.textContent = `第 ${col + 1} 排｜醜1`;
+      if (count === 2) btn.textContent = `第 ${col + 1} 排｜醜2`;
     }
 
     function explodeColumn(col) {
@@ -157,6 +181,14 @@
           cell.textContent = '💥';
         }, index * 120);
       });
+    }
+
+    function singleExplode(cell) {
+      if (cell.classList.contains('destroyed')) return;
+
+      cell.classList.add('hit');
+      cell.classList.add('destroyed');
+      cell.textContent = '💥';
     }
 
     function addAttack() {
@@ -197,12 +229,16 @@
 
     function resetGame() {
       scores = {};
+      columnHits = Array(COLS).fill(0);
       renderScores();
 
       document.querySelectorAll('.cell').forEach(cell => {
         cell.textContent = '';
         cell.classList.remove('hit');
+        cell.classList.remove('destroyed');
       });
+
+      createColumnButtons();
     }
 
     createBoard();
