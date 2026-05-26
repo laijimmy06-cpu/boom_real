@@ -85,7 +85,12 @@
   </style>
 </head>
 <body>
+  <audio id="boomSound">
+    <source src="https://actions.google.com/sounds/v1/explosions/explosion.ogg" type="audio/ogg">
+  </audio>
   <h1>🚢 班級炸船遊戲</h1>
+  <div class="random-player" id="randomPlayer">🎲 隨機抽選：尚未抽取</div>
+  <button class="random-btn" onclick="pickRandomPlayer()">隨機抽第一位</button>
   <p>6×8 海域｜可記錄攻擊成功者</p>
 
   <div class="top-controls" id="columnButtons"></div>
@@ -189,6 +194,7 @@
         explodedCount++;
 
         setTimeout(() => {
+          playBoom();
           cell.classList.add('hit');
           cell.classList.add('destroyed');
           cell.textContent = '💥';
@@ -198,10 +204,23 @@
       autoAddAttack(explodedCount);
     }
 
+    function playBoom() {
+      const sound = document.getElementById('boomSound');
+      sound.currentTime = 0;
+      sound.play();
+    }
+
+    function pickRandomPlayer() {
+      const number = Math.floor(Math.random() * 48) + 1;
+      document.getElementById('randomPlayer').textContent = `🎲 隨機抽選：${number} 號`;
+      document.getElementById('studentId').value = number;
+    }
+
     function singleExplode(cell) {
       if (cell.classList.contains('destroyed')) return;
 
-      cell.classList.add('hit');
+      playBoom();
+          cell.classList.add('hit');
       cell.classList.add('destroyed');
       cell.textContent = '💥';
 
@@ -288,11 +307,32 @@
 
   <style>
     body {
+      margin: 0;
+      min-height: 100vh;
       background: linear-gradient(135deg, #0f172a, #1e293b);
       color: white;
       font-family: Arial, sans-serif;
       padding: 20px;
       text-align: center;
+    }
+
+    .random-player {
+      font-size: 28px;
+      font-weight: bold;
+      margin-top: 15px;
+      margin-bottom: 10px;
+      color: #facc15;
+    }
+
+    .random-btn {
+      background: #f59e0b;
+      border: none;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 18px;
+      margin-bottom: 20px;
     }
 
     .main-layout {
