@@ -96,6 +96,10 @@
   <div class="top-controls" id="columnButtons"></div>
 
   <div class="main-layout">
+    <div class="left-panel">
+      <h2>📊 各排排行榜</h2>
+      <div id="columnRanking"></div>
+    </div>
     <div>
       <div class="board" id="board"></div>
     </div>
@@ -134,6 +138,7 @@
     const scoreList = document.getElementById('scoreList');
 
     let scores = {};
+    let columnStats = Array(COLS).fill(0);
 
     function createBoard() {
       board.innerHTML = '';
@@ -160,9 +165,11 @@
         const btn = document.createElement('button');
         btn.id = `colBtn-${c}`;
         updateColumnButton(c, btn);
+        renderColumnRanking();
 
         btn.onclick = () => {
           columnHits[c]++;
+          columnStats[c]++;
 
           if (columnHits[c] >= 3) {
             explodeColumn(c);
@@ -170,10 +177,34 @@
           }
 
           updateColumnButton(c, btn);
+        renderColumnRanking();
         };
 
         columnButtons.appendChild(btn);
       }
+    }
+
+    function renderColumnRanking() {
+      const ranking = document.getElementById('columnRanking');
+      ranking.innerHTML = '';
+
+      const sorted = columnStats
+        .map((count, index) => ({
+          col: index + 1,
+          count
+        }))
+        .sort((a, b) => b.count - a.count);
+
+      sorted.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'score-item';
+        div.innerHTML = `
+          <span>第 ${item.col} 排</span>
+          <strong>${item.count} 次</strong>
+        `;
+
+        ranking.appendChild(div);
+      });
     }
 
     function updateColumnButton(col, btn) {
@@ -293,6 +324,7 @@
     }
 
     function resetGame() {
+      columnStats = Array(COLS).fill(0);
       scores = {};
       columnHits = Array(COLS).fill(0);
       renderScores();
@@ -429,6 +461,7 @@
       color: white;
     }
 
+    .left-panel,
     .side-panel {
       width: 300px;
       background: rgba(255,255,255,0.08);
