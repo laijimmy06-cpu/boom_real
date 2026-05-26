@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>炸船遊戲</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: linear-gradient(135deg, #0f172a, #1e293b);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+    }
+
+    p {
+      margin-top: 0;
+      opacity: 0.9;
+    }
+
+    .game-container {
+      display: flex;
+      gap: 40px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    .board-box {
+      text-align: center;
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(8, 45px);
+      grid-template-rows: repeat(8, 45px);
+      gap: 4px;
+      background: rgba(255,255,255,0.1);
+      padding: 10px;
+      border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    }
+
+    .cell {
+      width: 45px;
+      height: 45px;
+      background: #38bdf8;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: 0.2s;
+      font-size: 20px;
+      user-select: none;
+    }
+
+    .cell:hover {
+      transform: scale(1.05);
+      background: #0ea5e9;
+    }
+
+    .hit {
+      background: #ef4444 !important;
+    }
+
+    .miss {
+      background: #94a3b8 !important;
+    }
+
+    .ship {
+      background: #22c55e;
+    }
+
+    .controls {
+      margin-top: 25px;
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    button {
+      border: none;
+      padding: 12px 20px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 16px;
+      background: #2563eb;
+      color: white;
+      transition: 0.2s;
+    }
+
+    button:hover {
+      background: #1d4ed8;
+    }
+
+    .status {
+      margin-top: 20px;
+      font-size: 18px;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .footer {
+      margin-top: 30px;
+      opacity: 0.7;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🚢 班級炸船遊戲</h1>
+  <p>6×8 海域｜可記錄攻擊成功者</p>
+
+  <div class="top-controls" id="columnButtons"></div>
+
+  <div class="main-layout">
+    <div>
+      <div class="board" id="board"></div>
+    </div>
+
+    <div class="side-panel">
+      <h2>🏆 攻擊成功排行榜</h2>
+
+      <div class="input-box">
+        <input type="text" id="studentId" placeholder="輸入號碼" />
+        <button onclick="addAttack()">增加成功次數</button>
+      </div>
+
+      <div id="scoreList"></div>
+
+      <button class="reset-btn" onclick="resetGame()">重置遊戲</button>
+    </div>
+  </div>
+
+  <script>
+    const ROWS = 6;
+    const COLS = 8;
+
+    const board = document.getElementById('board');
+    const columnButtons = document.getElementById('columnButtons');
+    const scoreList = document.getElementById('scoreList');
+
+    let scores = {};
+
+    function createBoard() {
+      board.innerHTML = '';
+      board.style.gridTemplateColumns = `repeat(${COLS}, 60px)`;
+
+      for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+          const cell = document.createElement('div');
+          cell.className = 'cell';
+          cell.dataset.row = r;
+          cell.dataset.col = c;
+          board.appendChild(cell);
+        }
+      }
+    }
+
+    function createColumnButtons() {
+      columnButtons.innerHTML = '';
+
+      for (let c = 0; c < COLS; c++) {
+        const btn = document.createElement('button');
+        btn.textContent = `爆第 ${c + 1} 排`;
+        btn.onclick = () => explodeColumn(c);
+        columnButtons.appendChild(btn);
+      }
+    }
+
+    function explodeColumn(col) {
+      const cells = document.querySelectorAll(`.cell[data-col='${col}']`);
+
+      cells.forEach((cell, index) => {
+        setTimeout(() => {
+          cell.classList.add('hit');
+          cell.textContent = '💥';
+
+          setTimeout(() => {
+            cell.classList.remove('hit');
+            cell.textContent = '';
+          }, 800);
+        }, index * 120);
+      });
+    }
+
+    function addAttack() {
+      const input = document.getElementById('studentId');
+      const id = input.value.trim();
+
+      if (!id) return;
+
+      if (!scores[id]) {
+        scores[id] = 0;
+      }
+
+      scores[id]++;
+
+      renderScores();
+
+      input.value = '';
+    }
+
+    function renderScores() {
+      scoreList.innerHTML = '';
+
+      const sorted = Object.entries(scores)
+        .sort((a, b) => b[1] - a[1]);
+
+      sorted.forEach(([id, score], index) => {
+        const item = document.createElement('div');
+        item.className = 'score-item';
+
+        item.innerHTML = `
+          <span>#${index + 1}　${id}</span>
+          <strong>${score} 次</strong>
+        `;
+
+        scoreList.appendChild(item);
+      });
+    }
+
+    function resetGame() {
+      scores = {};
+      renderScores();
+
+      document.querySelectorAll('.cell').forEach(cell => {
+        cell.textContent = '';
+        cell.classList.remove('hit');
+      });
+    }
+
+    createBoard();
+    createColumnButtons();
+  </script>
+
+  <style>
+    body {
+      background: linear-gradient(135deg, #0f172a, #1e293b);
+      color: white;
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .main-layout {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+
+    .top-controls {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+
+    .top-controls button,
+    .reset-btn,
+    .input-box button {
+      background: #2563eb;
+      border: none;
+      color: white;
+      padding: 10px 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 15px;
+    }
+
+    .board {
+      display: grid;
+      gap: 6px;
+      background: rgba(255,255,255,0.1);
+      padding: 15px;
+      border-radius: 18px;
+    }
+
+    .cell {
+      width: 60px;
+      height: 60px;
+      background: #38bdf8;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      transition: 0.2s;
+    }
+
+    .hit {
+      background: #ef4444 !important;
+      transform: scale(1.05);
+    }
+
+    .side-panel {
+      width: 300px;
+      background: rgba(255,255,255,0.08);
+      padding: 20px;
+      border-radius: 18px;
+      text-align: left;
+    }
+
+    .input-box {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .input-box input {
+      flex: 1;
+      padding: 10px;
+      border-radius: 10px;
+      border: none;
+      font-size: 16px;
+    }
+
+    .score-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px;
+      margin-bottom: 10px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 10px;
+    }
+  </style>
+</body>
+</html>
