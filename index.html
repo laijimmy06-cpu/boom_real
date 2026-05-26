@@ -99,7 +99,17 @@
       <h2>🏆 攻擊成功排行榜</h2>
 
       <div class="input-box">
-        <input type="text" id="studentId" placeholder="輸入號碼" />
+        <select id="studentId">
+          <option value="">選擇號碼</option>
+        </select>
+
+        <select id="attackCount">
+          <option value="1">+1 次</option>
+          <option value="2">+2 次</option>
+          <option value="3">+3 次</option>
+          <option value="5">+5 次</option>
+        </select>
+
         <button onclick="addAttack()">增加成功次數</button>
       </div>
 
@@ -171,9 +181,12 @@
 
     function explodeColumn(col) {
       const cells = document.querySelectorAll(`.cell[data-col='${col}']`);
+      let explodedCount = 0;
 
       cells.forEach((cell, index) => {
         if (cell.classList.contains('destroyed')) return;
+
+        explodedCount++;
 
         setTimeout(() => {
           cell.classList.add('hit');
@@ -181,6 +194,8 @@
           cell.textContent = '💥';
         }, index * 120);
       });
+
+      autoAddAttack(explodedCount);
     }
 
     function singleExplode(cell) {
@@ -189,11 +204,12 @@
       cell.classList.add('hit');
       cell.classList.add('destroyed');
       cell.textContent = '💥';
+
+      autoAddAttack(1);
     }
 
-    function addAttack() {
-      const input = document.getElementById('studentId');
-      const id = input.value.trim();
+    function autoAddAttack(count) {
+      const id = document.getElementById('studentId').value;
 
       if (!id) return;
 
@@ -201,11 +217,35 @@
         scores[id] = 0;
       }
 
-      scores[id]++;
+      scores[id] += count;
 
       renderScores();
+    }
 
-      input.value = '';
+    function addAttack() {
+      const id = document.getElementById('studentId').value;
+      const count = parseInt(document.getElementById('attackCount').value);
+
+      if (!id) return;
+
+      if (!scores[id]) {
+        scores[id] = 0;
+      }
+
+      scores[id] += count;
+
+      renderScores();
+    }
+
+    function createStudentOptions() {
+      const select = document.getElementById('studentId');
+
+      for (let i = 1; i <= 48; i++) {
+        const option = document.createElement('option');
+        option.value = i;
+        option.textContent = `${i} 號`;
+        select.appendChild(option);
+      }
     }
 
     function renderScores() {
@@ -243,6 +283,7 @@
 
     createBoard();
     createColumnButtons();
+    createStudentOptions();
   </script>
 
   <style>
@@ -328,12 +369,14 @@
       flex-wrap: wrap;
     }
 
-    .input-box input {
+    .input-box select {
       flex: 1;
       padding: 10px;
       border-radius: 10px;
       border: none;
       font-size: 16px;
+      background: white;
+      color: black;
     }
 
     .score-item {
