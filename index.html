@@ -54,52 +54,15 @@
     }
 
     .cell {
-      width: 45px;
-      height: 45px;
+      width: 60px;
+      height: 60px;
       background: #38bdf8;
-      border-radius: 10px;
+      border-radius: 0;
+      border: 2px solid rgba(255,255,255,0.25);
       display: flex;
       align-items: center;
       justify-content: center;
-      cursor: pointer;
-      transition: 0.2s;
-      font-size: 20px;
-      user-select: none;
-    }
-
-    .cell:hover {
-      transform: scale(1.05);
-      background: #0ea5e9;
-    }
-
-    .hit {
-      background: #ef4444 !important;
-    }
-
-    .miss {
-      background: #94a3b8 !important;
-    }
-
-    .ship {
-      background: #22c55e;
-    }
-
-    .controls {
-      margin-top: 25px;
-      display: flex;
-      gap: 15px;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-
-    button {
-      border: none;
-      padding: 12px 20px;
-      border-radius: 12px;
-      cursor: pointer;
-      font-size: 16px;
-      background: #2563eb;
-      color: white;
+      font-size: 28px;
       transition: 0.2s;
     }
 
@@ -186,14 +149,12 @@
       const cells = document.querySelectorAll(`.cell[data-col='${col}']`);
 
       cells.forEach((cell, index) => {
+        if (cell.classList.contains('destroyed')) return;
+
         setTimeout(() => {
           cell.classList.add('hit');
+          cell.classList.add('destroyed');
           cell.textContent = '💥';
-
-          setTimeout(() => {
-            cell.classList.remove('hit');
-            cell.textContent = '';
-          }, 800);
         }, index * 120);
       });
     }
@@ -308,7 +269,12 @@
 
     .hit {
       background: #ef4444 !important;
-      transform: scale(1.05);
+      transform: scale(1.02);
+    }
+
+    .destroyed {
+      background: #7f1d1d !important;
+      color: white;
     }
 
     .side-panel {
