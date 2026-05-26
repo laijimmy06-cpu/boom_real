@@ -351,11 +351,19 @@
     }
 
     .top-controls {
-      display: flex;
+      display: grid;
+      grid-template-columns: repeat(6, 96px);
+      gap: 14px;
       justify-content: center;
-      gap: 10px;
-      flex-wrap: wrap;
       margin-top: 20px;
+      margin-bottom: 14px;
+    }
+
+    .top-controls button {
+      width: 96px;
+      height: 56px;
+      font-size: 15px;
+      text-align: center;
     }
 
     .top-controls button,
